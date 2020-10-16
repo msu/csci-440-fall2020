@@ -14,9 +14,14 @@ public class Homework3 extends DBTest {
     /*
      * Create a view tracksPlus to display the artist, song title, album, and genre for all tracks.
      */
-    public void createTracksPlusView(){
-        //TODO fill this in
-        executeDDL("CREATE VIEW tracksPlus");
+    public void createTracksPlusView() {
+        executeDDL("CREATE VIEW tracksPlus AS " +
+                "SELECT artists.Name AS ArtistName, albums.Title AS AlbumTitle, tracks.Name, " +
+                "tracks.TrackId, genres.Name AS GenreName " +
+                "FROM tracks " +
+                "JOIN albums ON tracks.AlbumId = albums.AlbumId " +
+                "JOIN genres ON tracks.genreId = genres.GenreId " +
+                "JOIN artists ON albums.ArtistId = artists.ArtistId ");
 
         List<Map<String, Object>> results = executeSQL("SELECT * FROM tracksPlus ORDER BY TrackId");
         assertEquals(3503, results.size());
@@ -34,15 +39,20 @@ public class Homework3 extends DBTest {
      *
      * Create a table grammy_category
      */
-    public void createGrammyInfoTable(){
-        //TODO fill these in
-        executeDDL("create table grammy_categories");
-        executeDDL("create table grammy_infos");
+    public void createGrammyInfoTable() {
+        executeDDL("CREATE TABLE grammy_categories (" +
+                "GrammyCategoryId INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "Name varchar(255));");
+        executeDDL("CREATE TABLE grammy_infos (" +
+                "ArtistId int, " +
+                "AlbumId int, " +
+                "TrackId int, " +
+                "GrammyCategoryId int, " +
+                "Status varchar(255));");
 
         // TEST CODE
         executeUpdate("INSERT INTO grammy_categories(Name) VALUES ('Greatest Ever');");
         Object categoryId = executeSQL("SELECT GrammyCategoryId FROM grammy_categories").get(0).get("GrammyCategoryId");
-
         executeUpdate("INSERT INTO grammy_infos(ArtistId, AlbumId, TrackId, GrammyCategoryId, Status) VALUES (1, 1, 1, " + categoryId + ",'Won');");
 
         List<Map<String, Object>> results = executeSQL("SELECT * FROM grammy_infos");
@@ -60,8 +70,8 @@ public class Homework3 extends DBTest {
     public void bulkInsertGenres(){
         Integer before = (Integer) executeSQL("SELECT COUNT(*) as COUNT FROM genres").get(0).get("COUNT");
 
-        //TODO fill this in
-        executeUpdate("INSERT");
+        executeUpdate("INSERT INTO genres(Name) " +
+                "VALUES ('Post-Punk'), ('Shoegaze'), ('Ambient'), ('Baroque'), ('Ska-Punk')");
 
         Integer after = (Integer) executeSQL("SELECT COUNT(*) as COUNT FROM genres").get(0).get("COUNT");
         assertEquals(before + 5, after);
